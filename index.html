@@ -125,7 +125,7 @@ animation: note-float 2s ease-out infinite;
 <div class="fixed top-4 right-4 z-50">
 <button id="musicToggle" onclick="toggleMusic()" class="w-12 h-12 bg-white rounded-full p-1 shadow-md border-2 border-[#FFD6E8] flex items-center justify-center hover:scale-110 active:scale-95 transition-all group relative">
 <div class="w-full h-full rounded-full border-2 border-[#FFF0F5] bg-[#FFF0F5] flex items-center justify-center">
-<div id="cleficon" class="flex items-center justify-center text-[#B0658A] transition-transform animate-clef-playing">
+<div id="cleficon" class="flex items-center justify-center text-[#B0658A] transition-transform">
 <i data-lucide="music" class="w-5 h-5 stroke-[2.5]"></i>
 </div>
 </div>
@@ -225,7 +225,7 @@ open 10:00 closed 21:00
 <li class="flex items-start gap-1.5"><span>☆</span> <span>สามารถ Check up-date สถานะสินค้าใน #엘레update / Sheet</span></li>
 <li class="flex items-start gap-1.5"><span>☆</span> <span>ร้านเราส่งของอาทิตย์ละ 1 ครั้ง เนื่องจากมีติดทำงาน <br>งดเร่งใดๆทั้งสิ้น</span></li>
 <li class="flex items-start gap-1.5"><span>☆</span> <span>สินค้าทุกชิ้นหลังจากส่องไฟมีตำหนิหรือไม่มีก็ตามที่ถ่ายแจ้งไว้ หากสินค้าถึงมือแล้วมีตำหนิโผล่มาถือว่าเกิดจากขนส่งและสินค้าทุกชิ้นหากมีตำหนิมาจากโรงงาน ไม่รับเคลมใดๆทั้งสิ้น <br>ขอบคุณค่ะ</span></li>
-<li class="flex items-start gap-1.5 font-medium text-brown pt-1 border-t border-pinky-light/60 mt-2"> <span>หมายเหตุ : ราคาสินค้าสามารถขอต่อราคาได้ตามความเหมาะสมนะคะ</span></li>
+<li class="flex items-start gap-1.5 font-medium text-brown pt-1 border-t border-pinky-light/60 mt-2"><span>หมายเหตุ : ราคาสินค้าสามารถขอต่อราคาได้ตามความเหมาะสมนะคะ</span></li>
 </ul>
 </div>
 </div>
@@ -290,7 +290,7 @@ open 10:00 closed 21:00
 </div>
 <div class="p-4 text-center bg-cream space-y-3 max-h-[75vh] overflow-y-auto">
 <div class="bg-white p-2.5 rounded-2xl inline-block shadow-sm border-2 border-dashed border-brown/40">
-<img src="ไม่มีชื่อ 19_20261002232202.png" alt="QR Code" class="w-36 h-36 mx-auto object-contain" onerror="this.onerror=null; this.src='https://placehold.co/200x200/FFF0F5/B0658A?text=QR+CODE';">
+<img src="att.lT4yxeTyfUn7jJQKz4a6ee81V-vz7ABBCq3rXIPONnk.jpeg" alt="QR Code" class="w-36 h-36 mx-auto object-contain" onerror="this.onerror=null; this.src='https://placehold.co/200x200/FFF0F5/B0658A?text=QR+CODE';">
 </div>
 <div class="text-center pb-1">
 <p class="text-[11px] text-brown-light font-medium">‎₊˚꒰🍓꒱‧ 𝙱𝚎𝚗𝚢𝚊𝚙𝚊 𝙹𝚎𝚝. ‧₊ ᵎᵎ 🍒</p>
@@ -363,7 +363,7 @@ if (e.target === paymentModal) closeModal('paymentModal');
 
 /* ระบบ YouTube Music Player Integration */
 let player;
-let isPlaying = true; // ตั้งค่าเริ่มต้นให้สถานะเป็นเล่นเพลง
+let isPlaying = false;
 let noteInterval = null;
 
 function onYouTubeIframeAPIReady() {
@@ -379,12 +379,8 @@ playerVars: {
 },
 events: {
 'onReady': function(event) {
+// พยายามสั่งเล่นเพลงทันที
 event.target.playVideo();
-isPlaying = true;
-const cleficon = document.getElementById('cleficon');
-if (cleficon) cleficon.classList.add('animate-clef-playing');
-createFloatingNote();
-noteInterval = setInterval(createFloatingNote, 600);
 }
 }
 });
@@ -414,21 +410,23 @@ player.pauseVideo();
 }
 cleficon.classList.remove('animate-clef-playing');
 clearInterval(noteInterval);
+isPlaying = false;
 } else {
 if (player && player.playVideo) {
 player.playVideo();
 }
 cleficon.classList.add('animate-clef-playing');
+if (!noteInterval) {
 createFloatingNote();
 noteInterval = setInterval(createFloatingNote, 600);
 }
-isPlaying = !isPlaying;
+isPlaying = true;
+}
 }
 
-// ระบบช่วยเหลือกรณีเว็บบราว์เซอร์บล็อกการเล่นเพลงอัตโนมัติ (Autoplay Policy)
+// ระบบปลดล็อกเสียงอัตโนมัติเมื่อมีการแตะหน้าจอครั้งแรก (แก้ปัญหาบราวเซอร์บล็อก)
 document.addEventListener('click', function unlockAudio() {
 if (player && typeof player.playVideo === 'function' && !isPlaying) {
-// ถ้าผู้ใช้เคยคลิกจอครั้งแรกแล้วเพลงยังไม่เล่น จะบังคับเล่นให้ทันที
 player.playVideo();
 isPlaying = true;
 const cleficon = document.getElementById('cleficon');
@@ -438,7 +436,6 @@ createFloatingNote();
 noteInterval = setInterval(createFloatingNote, 600);
 }
 }
-document.removeEventListener('click', unlockAudio);
 }, { once: true });
 </script>
 </body>
